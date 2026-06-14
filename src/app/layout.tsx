@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { Sidebar } from "@/components/sidebar";
-
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+import { AppShell } from "@/components/layout/app-shell";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -29,13 +33,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
+      className={cn(
+        "h-full antialiased",
+        geistSans.variable,
+        geistMono.variable,
+        instrumentSerif.variable
+      )}
     >
-      <body className="min-h-full flex bg-background text-foreground">
-        <Sidebar />
-        <main className="flex-1 ml-64 min-h-screen">
-          {children}
-        </main>
+      <body className="min-h-full bg-background text-foreground">
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
