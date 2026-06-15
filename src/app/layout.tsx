@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
-import "./globals.css";
+// We will use the grayed theme instead of the default theme so that the pacing, contrast, and size to do all of the heavy lifting.
+// import "./globals.css";
+import "./globals.grayed.css";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/layout/app-shell";
 

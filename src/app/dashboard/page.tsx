@@ -67,7 +67,9 @@ export default function DashboardPage() {
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <PageTitle>Good morning</PageTitle>
-          <PageDescription>Sunday, June 15 · Here&apos;s your wellness snapshot.</PageDescription>
+          <PageDescription>
+            Sunday, June 15 · Here&apos;s your wellness snapshot.
+          </PageDescription>
         </div>
         <Button render={<Link href="/logs/new" />} size="sm">
           <Plus className="size-3.5" />
@@ -130,20 +132,28 @@ export default function DashboardPage() {
                   className="flex items-center gap-4 py-3 first:pt-0 last:pb-0"
                 >
                   <div className="w-20 shrink-0">
-                    <p className="text-sm font-medium text-foreground">{log.date}</p>
+                    <p className="text-sm font-medium text-foreground">
+                      {log.date}
+                    </p>
                     <p className="text-xs text-muted-foreground">{log.sleep}</p>
                   </div>
                   <div className="flex flex-1 flex-col gap-1">
                     <div className="flex items-center gap-2">
-                      <span className="w-16 text-xs text-muted-foreground">Morning</span>
+                      <span className="w-16 text-xs text-muted-foreground">
+                        Morning
+                      </span>
                       <EnergyBar value={log.morning} />
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="w-16 text-xs text-muted-foreground">Afternoon</span>
+                      <span className="w-16 text-xs text-muted-foreground">
+                        Afternoon
+                      </span>
                       <EnergyBar value={log.afternoon} />
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="w-16 text-xs text-muted-foreground">Evening</span>
+                      <span className="w-16 text-xs text-muted-foreground">
+                        Evening
+                      </span>
                       <EnergyBar value={log.evening} />
                     </div>
                   </div>
@@ -159,7 +169,11 @@ export default function DashboardPage() {
             title="Latest Insights"
             description="Patterns detected this week."
             action={
-              <Button variant="ghost" size="xs" render={<Link href="/insights" />}>
+              <Button
+                variant="ghost"
+                size="xs"
+                render={<Link href="/insights" />}
+              >
                 All <ArrowRight className="size-3" />
               </Button>
             }
@@ -190,8 +204,20 @@ export default function DashboardPage() {
             .slice()
             .reverse()
             .concat([
-              { date: "Jun 10", sleep: "7h 45m", morning: 7, afternoon: 8, evening: 9 },
-              { date: "Jun 9", sleep: "8h 00m", morning: 8, afternoon: 7, evening: 8 },
+              {
+                date: "Jun 10",
+                sleep: "7h 45m",
+                morning: 7,
+                afternoon: 8,
+                evening: 9,
+              },
+              {
+                date: "Jun 9",
+                sleep: "8h 00m",
+                morning: 8,
+                afternoon: 7,
+                evening: 8,
+              },
             ])
             .slice(0, 7)
             .map((log, i) => (
@@ -200,15 +226,19 @@ export default function DashboardPage() {
                   {[log.morning, log.afternoon, log.evening].map((val, j) => (
                     <div
                       key={j}
-                      className="w-full rounded-sm opacity-80"
+                      className="w-full rounded-sm opacity-80 bg-gray-600"
                       style={{
                         height: `${(val / 10) * 80}px`,
-                        backgroundColor: `oklch(${0.62 - j * 0.08} 0.12 ${162 - j * 2})`,
+                        // backgroundColor: `oklch(${0.62 - j * 0.08} 0.12 ${162 - j * 2})`,
                       }}
                     />
                   ))}
                 </div>
-                <span className="text-[10px] text-muted-foreground">{log.date.replace("Today", "Today").replace("Yesterday", "Yest.")}</span>
+                <span className="text-[10px] text-muted-foreground">
+                  {log.date
+                    .replace("Today", "Today")
+                    .replace("Yesterday", "Yest.")}
+                </span>
               </div>
             ))}
         </div>
@@ -216,10 +246,12 @@ export default function DashboardPage() {
           {["Morning", "Afternoon", "Evening"].map((label, i) => (
             <div key={label} className="flex items-center gap-1.5">
               <div
-                className="size-2 rounded-full"
-                style={{
-                  backgroundColor: `oklch(${0.62 - i * 0.08} 0.12 ${162 - i * 2})`,
-                }}
+                className="size-2 rounded-full bg-gray-600"
+                style={
+                  {
+                    // backgroundColor: `oklch(${0.62 - i * 0.08} 0.12 ${162 - i * 2})`,
+                  }
+                }
               />
               <span className="text-xs text-muted-foreground">{label}</span>
             </div>

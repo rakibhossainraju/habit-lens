@@ -1,4 +1,12 @@
-import { TrendingUp, TrendingDown, Minus, BedDouble, Zap, Dumbbell, Droplets } from "lucide-react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  BedDouble,
+  Zap,
+  Dumbbell,
+  Droplets,
+} from "lucide-react";
 import { PageTitle } from "@/components/typography/page-title";
 import { PageDescription } from "@/components/typography/page-description";
 import { PageContainer } from "@/components/layout/page-container";
@@ -78,9 +86,15 @@ const confidenceConfig = {
   low: { label: "Low", bar: "w-1/3", color: "bg-muted-foreground/40" },
 };
 
+// const directionConfig = {
+//   positive: { icon: TrendingUp, color: "text-emerald-600 dark:text-emerald-400" },
+//   negative: { icon: TrendingDown, color: "text-rose-500 dark:text-rose-400" },
+//   neutral: { icon: Minus, color: "text-muted-foreground" },
+// };
+
 const directionConfig = {
-  positive: { icon: TrendingUp, color: "text-emerald-600 dark:text-emerald-400" },
-  negative: { icon: TrendingDown, color: "text-rose-500 dark:text-rose-400" },
+  positive: { icon: TrendingUp, color: "text-gray-600 dark:text-gray-400" },
+  negative: { icon: TrendingDown, color: "text-gray-500 dark:text-gray-400" },
   neutral: { icon: Minus, color: "text-muted-foreground" },
 };
 
@@ -95,7 +109,10 @@ function InsightCard({ insight }: { insight: Insight }) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-accent">
-            <MetricIcon className="size-4 text-accent-foreground" strokeWidth={1.5} />
+            <MetricIcon
+              className="size-4 text-accent-foreground"
+              strokeWidth={1.5}
+            />
           </div>
           <p className="font-heading text-base font-normal text-foreground leading-snug">
             {insight.title}
@@ -109,9 +126,13 @@ function InsightCard({ insight }: { insight: Insight }) {
       </p>
 
       <div className="flex items-center justify-between border-t border-border pt-3">
-        <span className="text-xs text-muted-foreground">{insight.relatedMetric}</span>
+        <span className="text-xs text-muted-foreground">
+          {insight.relatedMetric}
+        </span>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{conf.label} confidence</span>
+          <span className="text-xs text-muted-foreground">
+            {conf.label} confidence
+          </span>
           <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
             <div className={cn("h-full rounded-full", conf.bar, conf.color)} />
           </div>
@@ -130,15 +151,31 @@ export default function InsightsPage() {
       <div>
         <PageTitle>Insights</PageTitle>
         <PageDescription>
-          Rule-based patterns detected from your logged data. Updated as you add more entries.
+          Rule-based patterns detected from your logged data. Updated as you add
+          more entries.
         </PageDescription>
       </div>
 
       {/* Summary stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total Insights" value={insights.length} icon={TrendingUp} />
-        <StatCard label="High Confidence" value={highConf.length} icon={TrendingUp} trend="up" trendValue="Strong signal" />
-        <StatCard label="Entries Analysed" value="24" icon={BedDouble} subtext="last 30 days" />
+        <StatCard
+          label="Total Insights"
+          value={insights.length}
+          icon={TrendingUp}
+        />
+        <StatCard
+          label="High Confidence"
+          value={highConf.length}
+          icon={TrendingUp}
+          trend="up"
+          trendValue="Strong signal"
+        />
+        <StatCard
+          label="Entries Analysed"
+          value="24"
+          icon={BedDouble}
+          subtext="last 30 days"
+        />
       </div>
 
       {/* High confidence */}

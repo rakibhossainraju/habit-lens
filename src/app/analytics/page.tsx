@@ -30,21 +30,24 @@ const correlations = [
     a: "Sleep Duration",
     b: "Morning Energy",
     r: 0.82,
-    description: "Strong positive — longer sleep strongly predicts higher morning energy.",
+    description:
+      "Strong positive — longer sleep strongly predicts higher morning energy.",
     direction: "positive" as const,
   },
   {
     a: "Exercise",
     b: "Afternoon Energy",
     r: 0.74,
-    description: "Strong positive — days with any exercise show higher afternoon energy.",
+    description:
+      "Strong positive — days with any exercise show higher afternoon energy.",
     direction: "positive" as const,
   },
   {
     a: "Sugar Intake",
     b: "Evening Energy",
     r: -0.51,
-    description: "Moderate negative — higher sugar intake mildly predicts lower evening energy.",
+    description:
+      "Moderate negative — higher sugar intake mildly predicts lower evening energy.",
     direction: "negative" as const,
   },
 ];
@@ -67,13 +70,15 @@ function MiniBarChart({
         {data.map((d) => (
           <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
             <div
-              className="w-full rounded-sm"
+              className="w-full rounded-sm bg-gray-600"
               style={{
                 height: `${(d.value / max) * 88}px`,
-                backgroundColor: color,
+                // backgroundColor: color,
               }}
             />
-            <span className="text-[9px] text-muted-foreground">{d.date.slice(-2)}</span>
+            <span className="text-[9px] text-muted-foreground">
+              {d.date.slice(-2)}
+            </span>
           </div>
         ))}
       </div>
@@ -81,17 +86,14 @@ function MiniBarChart({
   );
 }
 
-function CorrelationCard({
-  corr,
-}: {
-  corr: (typeof correlations)[0];
-}) {
+function CorrelationCard({ corr }: { corr: (typeof correlations)[0] }) {
   const abs = Math.abs(corr.r);
   const isPositive = corr.direction === "positive";
   const barColor = isPositive ? "bg-primary" : "bg-rose-400";
-  const rColor = isPositive
-    ? "text-emerald-600 dark:text-emerald-400"
-    : "text-rose-500 dark:text-rose-400";
+  // const rColor = isPositive
+  //   ? "text-emerald-600 dark:text-emerald-400"
+  //   : "text-rose-500 dark:text-rose-400";
+  const rColor = "text-gray-600 dark:text-gray-400";
 
   return (
     <div className="flex flex-col gap-3 rounded-3xl bg-card p-5 shadow-md ring-1 ring-foreground/5">
@@ -141,9 +143,27 @@ export default function AnalyticsPage() {
 
       {/* Summary */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Avg Sleep" value={`${avgSleep}h`} icon={BedDouble} trend="up" trendValue="+0.4h" subtext="vs prior week" />
-        <StatCard label="Avg Morning Energy" value={avgMorning} icon={Zap} trend="up" trendValue="+0.6" />
-        <StatCard label="Best Sleep Night" value="Jun 13" icon={TrendingUp} subtext="8h 10m" />
+        <StatCard
+          label="Avg Sleep"
+          value={`${avgSleep}h`}
+          icon={BedDouble}
+          trend="up"
+          trendValue="+0.4h"
+          subtext="vs prior week"
+        />
+        <StatCard
+          label="Avg Morning Energy"
+          value={avgMorning}
+          icon={Zap}
+          trend="up"
+          trendValue="+0.6"
+        />
+        <StatCard
+          label="Best Sleep Night"
+          value="Jun 13"
+          icon={TrendingUp}
+          subtext="8h 10m"
+        />
       </div>
 
       {/* Sleep Trends */}
@@ -155,7 +175,10 @@ export default function AnalyticsPage() {
           <div className="h-px flex-1 bg-border" />
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <SectionCard title="Sleep Duration" description="Hours slept per night over 7 days.">
+          <SectionCard
+            title="Sleep Duration"
+            description="Hours slept per night over 7 days."
+          >
             <MiniBarChart
               data={sleepData.map((d) => ({ date: d.date, value: d.duration }))}
               max={10}
@@ -168,18 +191,24 @@ export default function AnalyticsPage() {
             </div>
           </SectionCard>
 
-          <SectionCard title="Bedtime Consistency" description="How close to your average 11:30 PM bedtime.">
+          <SectionCard
+            title="Bedtime Consistency"
+            description="How close to your average 11:30 PM bedtime."
+          >
             <div className="flex h-24 items-center gap-1.5">
               {sleepData.map((d) => {
                 const deviation = Math.abs(d.bed - 23.5);
                 const normalised = Math.min(deviation / 2, 1);
                 return (
-                  <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
+                  <div
+                    key={d.date}
+                    className="flex flex-1 flex-col items-center gap-1"
+                  >
                     <div
-                      className="w-full rounded-sm"
+                      className="w-full rounded-sm bg-gray-500"
                       style={{
                         height: `${normalised * 80 + 8}px`,
-                        backgroundColor: `oklch(${0.62 - normalised * 0.2} 0.12 ${160 + normalised * 10})`,
+                        // backgroundColor: `oklch(${0.62 - normalised * 0.2} 0.12 ${160 + normalised * 10})`,
                       }}
                     />
                     <span className="text-[9px] text-muted-foreground">
@@ -190,7 +219,8 @@ export default function AnalyticsPage() {
               })}
             </div>
             <p className="mt-3 border-t pt-3 text-xs text-muted-foreground">
-              Shorter bar = closer to your average bedtime. Lower deviation = better consistency.
+              Shorter bar = closer to your average bedtime. Lower deviation =
+              better consistency.
             </p>
           </SectionCard>
         </div>
@@ -214,7 +244,10 @@ export default function AnalyticsPage() {
           </SectionCard>
           <SectionCard title="Afternoon Energy" size="sm">
             <MiniBarChart
-              data={energyData.map((d) => ({ date: d.date, value: d.afternoon }))}
+              data={energyData.map((d) => ({
+                date: d.date,
+                value: d.afternoon,
+              }))}
               max={10}
               color="oklch(0.54 0.12 160)"
             />
@@ -229,10 +262,16 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Stacked view */}
-        <SectionCard title="Energy Overview" description="Morning, afternoon, and evening stacked by day.">
+        <SectionCard
+          title="Energy Overview"
+          description="Morning, afternoon, and evening stacked by day."
+        >
           <div className="flex h-36 items-end gap-2">
             {energyData.map((d) => (
-              <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
+              <div
+                key={d.date}
+                className="flex flex-1 flex-col items-center gap-1"
+              >
                 <div className="flex w-full flex-col gap-0.5">
                   {[
                     { val: d.morning, color: "oklch(0.62 0.12 162)" },
@@ -241,12 +280,17 @@ export default function AnalyticsPage() {
                   ].map(({ val, color }, i) => (
                     <div
                       key={i}
-                      className="w-full rounded-sm"
-                      style={{ height: `${(val / 10) * 38}px`, backgroundColor: color }}
+                      className="w-full rounded-sm bg-gray-500"
+                      style={{
+                        height: `${(val / 10) * 38}px`,
+                        // backgroundColor: color,
+                      }}
                     />
                   ))}
                 </div>
-                <span className="text-[9px] text-muted-foreground">{d.date.slice(-2)}</span>
+                <span className="text-[9px] text-muted-foreground">
+                  {d.date.slice(-2)}
+                </span>
               </div>
             ))}
           </div>
@@ -255,7 +299,9 @@ export default function AnalyticsPage() {
               <div key={label} className="flex items-center gap-1.5">
                 <div
                   className="size-2 rounded-full"
-                  style={{ backgroundColor: `oklch(${0.62 - i * 0.08} 0.12 ${162 - i * 2})` }}
+                  style={{
+                    backgroundColor: `oklch(${0.62 - i * 0.08} 0.12 ${162 - i * 2})`,
+                  }}
                 />
                 <span className="text-xs text-muted-foreground">{label}</span>
               </div>

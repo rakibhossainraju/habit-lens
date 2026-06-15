@@ -14,9 +14,15 @@ interface StatCardProps {
   className?: string;
 }
 
+// const trendColors: Record<TrendDirection, string> = {
+//   up: "text-emerald-600 dark:text-emerald-400",
+//   up: "text-gray-600 dark:text-gray-400",
+//   down: "text-rose-500 dark:text-rose-400",
+//   neutral: "text-muted-foreground",
+// };
 const trendColors: Record<TrendDirection, string> = {
-  up: "text-emerald-600 dark:text-emerald-400",
-  down: "text-rose-500 dark:text-rose-400",
+  up: "text-gray-600 dark:text-gray-400",
+  down: "text-gray-500 dark:text-gray-400",
   neutral: "text-muted-foreground",
 };
 
