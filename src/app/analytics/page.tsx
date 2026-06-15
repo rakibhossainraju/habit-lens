@@ -70,7 +70,7 @@ function MiniBarChart({
         {data.map((d) => (
           <div key={d.date} className="flex flex-1 flex-col items-center gap-1">
             <div
-              className="w-full rounded-sm bg-gray-600"
+              className="w-full rounded-sm bg-gray-200"
               style={{
                 height: `${(d.value / max) * 88}px`,
                 // backgroundColor: color,
@@ -205,7 +205,7 @@ export default function AnalyticsPage() {
                     className="flex flex-1 flex-col items-center gap-1"
                   >
                     <div
-                      className="w-full rounded-sm bg-gray-500"
+                      className="w-full rounded-sm bg-gray-200"
                       style={{
                         height: `${normalised * 80 + 8}px`,
                         // backgroundColor: `oklch(${0.62 - normalised * 0.2} 0.12 ${160 + normalised * 10})`,
@@ -280,7 +280,7 @@ export default function AnalyticsPage() {
                   ].map(({ val, color }, i) => (
                     <div
                       key={i}
-                      className="w-full rounded-sm bg-gray-500"
+                      className="w-full rounded-sm bg-gray-200"
                       style={{
                         height: `${(val / 10) * 38}px`,
                         // backgroundColor: color,

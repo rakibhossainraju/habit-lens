@@ -226,7 +226,7 @@ export default function DashboardPage() {
                   {[log.morning, log.afternoon, log.evening].map((val, j) => (
                     <div
                       key={j}
-                      className="w-full rounded-sm opacity-80 bg-gray-600"
+                      className="w-full rounded-sm opacity-80 bg-gray-200"
                       style={{
                         height: `${(val / 10) * 80}px`,
                         // backgroundColor: `oklch(${0.62 - j * 0.08} 0.12 ${162 - j * 2})`,
@@ -246,7 +246,7 @@ export default function DashboardPage() {
           {["Morning", "Afternoon", "Evening"].map((label, i) => (
             <div key={label} className="flex items-center gap-1.5">
               <div
-                className="size-2 rounded-full bg-gray-600"
+                className="size-2 rounded-full bg-gray-200"
                 style={
                   {
                     // backgroundColor: `oklch(${0.62 - i * 0.08} 0.12 ${162 - i * 2})`,
