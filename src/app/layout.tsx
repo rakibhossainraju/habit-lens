@@ -30,6 +30,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isDevelopment = process?.env?.NODE_ENV === "development";
   return (
     <html
       lang="en"
@@ -37,9 +38,18 @@ export default function RootLayout({
         "h-full antialiased",
         geistSans.variable,
         geistMono.variable,
-        instrumentSerif.variable
+        instrumentSerif.variable,
       )}
     >
+      <head>
+        {isDevelopment && (
+          <script
+            crossOrigin="anonymous"
+            async
+            src="//unpkg.com/react-scan/dist/auto.global.js"
+          />
+        )}
+      </head>
       <body className="min-h-full bg-background text-foreground">
         <AppShell>{children}</AppShell>
       </body>
