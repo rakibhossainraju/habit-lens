@@ -226,6 +226,7 @@ export default function DashboardPage() {
                   {[log.morning, log.afternoon, log.evening].map((val, j) => (
                     <div
                       key={j}
+                      // @no-color
                       className="w-full rounded-sm opacity-80 bg-gray-200"
                       style={{
                         height: `${(val / 10) * 80}px`,
@@ -246,6 +247,7 @@ export default function DashboardPage() {
           {["Morning", "Afternoon", "Evening"].map((label, i) => (
             <div key={label} className="flex items-center gap-1.5">
               <div
+                // @no-color
                 className="size-2 rounded-full bg-gray-200"
                 style={
                   {

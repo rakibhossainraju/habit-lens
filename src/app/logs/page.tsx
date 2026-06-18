@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Pencil, Trash2, ChevronUp, ChevronDown } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Pencil,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+} from "lucide-react";
 import { PageTitle } from "@/components/typography/page-title";
 import { PageDescription } from "@/components/typography/page-description";
 import { PageContainer } from "@/components/layout/page-container";
@@ -86,18 +93,25 @@ const mockLogs = [
   },
 ];
 
-type SortField = "date" | "sleepDuration" | "morningEnergy" | "afternoonEnergy" | "eveningEnergy";
+type SortField =
+  | "date"
+  | "sleepDuration"
+  | "morningEnergy"
+  | "afternoonEnergy"
+  | "eveningEnergy";
 type SortDir = "asc" | "desc";
 
 function EnergyDot({ value }: { value: number }) {
-  const color =
-    value >= 8
-      ? "bg-emerald-500"
-      : value >= 6
-        ? "bg-primary"
-        : value >= 4
-          ? "bg-amber-400"
-          : "bg-rose-400";
+  // @no-color
+  // const color =
+  //   value >= 8
+  //     ? "bg-emerald-500"
+  //     : value >= 6
+  //       ? "bg-primary"
+  //       : value >= 4
+  //         ? "bg-amber-400"
+  //         : "bg-rose-400";
+  const color = "bg-gray-500";
   return (
     <span className="inline-flex items-center gap-1.5">
       <span className={cn("size-2 rounded-full", color)} />
@@ -125,7 +139,8 @@ export default function LogsPage() {
     .sort((a, b) => {
       const mul = sortDir === "asc" ? 1 : -1;
       if (sortField === "date") return mul * a.date.localeCompare(b.date);
-      if (sortField === "sleepDuration") return mul * a.sleepDuration.localeCompare(b.sleepDuration);
+      if (sortField === "sleepDuration")
+        return mul * a.sleepDuration.localeCompare(b.sleepDuration);
       return mul * ((a[sortField] as number) - (b[sortField] as number));
     });
 
@@ -146,7 +161,9 @@ export default function LogsPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <PageTitle>Daily Logs</PageTitle>
-          <PageDescription>Browse and manage your habit entries.</PageDescription>
+          <PageDescription>
+            Browse and manage your habit entries.
+          </PageDescription>
         </div>
         <Button render={<Link href="/logs/new" />} size="sm">
           <Plus className="size-3.5" />
@@ -235,10 +252,18 @@ export default function LogsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
-                        <Button variant="ghost" size="icon-xs" render={<Link href={`/logs/${log.id}`} />}>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          render={<Link href={`/logs/${log.id}`} />}
+                        >
                           <Pencil className="size-3.5" />
                         </Button>
-                        <Button variant="ghost" size="icon-xs" className="text-destructive hover:text-destructive">
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          className="text-destructive hover:text-destructive"
+                        >
                           <Trash2 className="size-3.5" />
                         </Button>
                       </div>
