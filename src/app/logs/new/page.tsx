@@ -4,11 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { PageTitle } from "@/components/typography/page-title";
-import { PageDescription } from "@/components/typography/page-description";
-import { PageContainer } from "@/components/layout/page-container";
-import { SectionCard } from "@/components/cards/section-card";
-import { Button } from "@/components/ui/button";
 
 interface CustomField {
   id: string;
@@ -25,20 +20,11 @@ function EnergySlider({
   value: number;
   onChange: (v: number) => void;
 }) {
-  const color =
-    value >= 8
-      ? "text-emerald-600"
-      : value >= 6
-        ? "text-primary"
-        : value >= 4
-          ? "text-amber-500"
-          : "text-rose-500";
-
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-foreground">{label}</label>
-        <span className={`text-sm font-medium tabular-nums ${color}`}>{value}/10</span>
+        <label className="text-sm text-foreground">{label}</label>
+        <span className="text-sm tabular-nums text-muted-foreground">{value}/10</span>
       </div>
       <input
         type="range"
@@ -47,37 +33,14 @@ function EnergySlider({
         step={1}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary"
+        className="w-full accent-primary"
       />
-      <div className="flex justify-between text-xs text-muted-foreground">
-        <span>0</span>
-        <span>5</span>
-        <span>10</span>
-      </div>
-    </div>
-  );
-}
-
-function FormField({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-foreground">{label}</label>
-      {children}
     </div>
   );
 }
 
 const inputClass =
-  "flex h-9 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring";
-
-const textareaClass =
-  "flex min-h-24 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none";
+  "w-full rounded border border-input bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring";
 
 export default function NewLogPage() {
   const router = useRouter();
@@ -113,135 +76,130 @@ export default function NewLogPage() {
   }
 
   return (
-    <PageContainer>
-      <div className="flex items-start gap-3">
-        <Button variant="ghost" size="icon-sm" render={<Link href="/logs" />} className="-ml-1 mt-1">
+    <div className="mx-auto max-w-lg px-4 py-8">
+      <div className="mb-6 flex items-center gap-2">
+        <Link href="/logs" className="text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-4" />
-        </Button>
-        <div>
-          <PageTitle>New Log</PageTitle>
-          <PageDescription>Record your habits and energy levels for today.</PageDescription>
-        </div>
+        </Link>
+        <h1 className="text-lg font-medium">New Log</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         {/* Sleep */}
-        <SectionCard
-          title="Sleep"
-          description="When did you fall asleep and wake up?"
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField label="Sleep time">
+        <section>
+          <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">Sleep</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-1">
+              <label className="text-sm text-foreground">Sleep time</label>
               <input
                 type="time"
                 value={sleepTime}
                 onChange={(e) => setSleepTime(e.target.value)}
                 className={inputClass}
               />
-            </FormField>
-            <FormField label="Wake time">
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm text-foreground">Wake time</label>
               <input
                 type="time"
                 value={wakeTime}
                 onChange={(e) => setWakeTime(e.target.value)}
                 className={inputClass}
               />
-            </FormField>
+            </div>
           </div>
-        </SectionCard>
+        </section>
+
+        <hr className="border-border" />
 
         {/* Energy */}
-        <SectionCard
-          title="Energy"
-          description="Rate your energy levels throughout the day from 0 to 10."
-        >
-          <div className="flex flex-col gap-6">
-            <EnergySlider
-              label="Morning energy"
-              value={morningEnergy}
-              onChange={setMorningEnergy}
-            />
-            <EnergySlider
-              label="Afternoon energy"
-              value={afternoonEnergy}
-              onChange={setAfternoonEnergy}
-            />
-            <EnergySlider
-              label="Evening energy"
-              value={eveningEnergy}
-              onChange={setEveningEnergy}
-            />
+        <section>
+          <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">Energy (0–10)</h2>
+          <div className="flex flex-col gap-4">
+            <EnergySlider label="Morning" value={morningEnergy} onChange={setMorningEnergy} />
+            <EnergySlider label="Afternoon" value={afternoonEnergy} onChange={setAfternoonEnergy} />
+            <EnergySlider label="Evening" value={eveningEnergy} onChange={setEveningEnergy} />
           </div>
-        </SectionCard>
+        </section>
+
+        <hr className="border-border" />
 
         {/* Notes */}
-        <SectionCard title="Notes" description="Anything worth remembering about today?">
+        <section>
+          <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-muted-foreground">Notes</h2>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            placeholder="Optional notes — food, exercise, mood, context..."
-            className={textareaClass}
+            placeholder="Food, exercise, mood, context..."
+            rows={4}
+            className={`${inputClass} resize-none`}
           />
-        </SectionCard>
+        </section>
+
+        <hr className="border-border" />
 
         {/* Custom Fields */}
-        <SectionCard
-          title="Custom Fields"
-          description="Track anything else that matters to you."
-          action={
-            <Button type="button" variant="outline" size="sm" onClick={addField}>
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">Custom Fields</h2>
+            <button
+              type="button"
+              onClick={addField}
+              className="flex items-center gap-1 text-sm text-primary hover:underline"
+            >
               <Plus className="size-3.5" />
               Add field
-            </Button>
-          }
-        >
+            </button>
+          </div>
           {customFields.length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">
-              No custom fields yet. Add one to track things like meals, exercise, or water intake.
-            </p>
+            <p className="text-sm text-muted-foreground">No custom fields yet.</p>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               {customFields.map((field) => (
                 <div key={field.id} className="flex items-center gap-2">
                   <input
                     type="text"
-                    placeholder="Field name (e.g. Exercise)"
+                    placeholder="Name"
                     value={field.key}
                     onChange={(e) => updateField(field.id, "key", e.target.value)}
                     className={`${inputClass} flex-1`}
                   />
                   <input
                     type="text"
-                    placeholder="Value (e.g. 30 min run)"
+                    placeholder="Value"
                     value={field.value}
-                    onChange={(e) =>
-                      updateField(field.id, "value", e.target.value)
-                    }
+                    onChange={(e) => updateField(field.id, "value", e.target.value)}
                     className={`${inputClass} flex-[2]`}
                   />
-                  <Button
+                  <button
                     type="button"
-                    variant="ghost"
-                    size="icon-sm"
                     onClick={() => removeField(field.id)}
                     className="shrink-0 text-muted-foreground hover:text-destructive"
                   >
                     <Trash2 className="size-4" />
-                  </Button>
+                  </button>
                 </div>
               ))}
             </div>
           )}
-        </SectionCard>
+        </section>
 
         {/* Actions */}
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" render={<Link href="/logs" />}>
+        <div className="flex justify-end gap-2 pt-2">
+          <Link
+            href="/logs"
+            className="rounded border border-input px-4 py-1.5 text-sm text-muted-foreground hover:bg-muted"
+          >
             Cancel
-          </Button>
-          <Button type="submit">Save log</Button>
+          </Link>
+          <button
+            type="submit"
+            className="rounded bg-primary px-4 py-1.5 text-sm text-primary-foreground hover:opacity-90"
+          >
+            Save log
+          </button>
         </div>
       </form>
-    </PageContainer>
+    </div>
   );
 }
