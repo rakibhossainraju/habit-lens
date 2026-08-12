@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  History, 
-  PlusSquare, 
-  Lightbulb, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  History,
+  Lightbulb,
+  BarChart3,
   Settings,
   Target
 } from "lucide-react";
@@ -16,7 +15,6 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Logs", href: "/logs", icon: History },
-  { name: "New Log", href: "/logs/new", icon: PlusSquare },
   { name: "Insights", href: "/insights", icon: Lightbulb },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
 ];
@@ -32,8 +30,8 @@ export function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-background transition-transform">
       <div className="flex h-full flex-col px-3 py-4">
         {/* Logo */}
-        <Link 
-          href="/dashboard" 
+        <Link
+          href="/dashboard"
           className="mb-8 flex items-center gap-2 px-3 py-2"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -52,8 +50,8 @@ export function Sidebar() {
                 href={item.href}
                 className={cn(
                   "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                  isActive 
-                    ? "bg-accent text-accent-foreground" 
+                  isActive
+                    ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground"
                 )}
               >
@@ -77,8 +75,8 @@ export function Sidebar() {
                 href={item.href}
                 className={cn(
                   "group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                  isActive 
-                    ? "bg-accent text-accent-foreground" 
+                  isActive
+                    ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground"
                 )}
               >
