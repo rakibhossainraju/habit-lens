@@ -370,3 +370,30 @@ Focus heavily on:
 * Consistent visual language
 
 Generate production-quality code organization.
+
+---
+
+<!-- BEGIN:design-and-brand-rules -->
+
+# Design & Brand System Rules
+
+**CRITICAL RULE: Never invent a visual language independently when project design specifications exist.**
+
+Before creating, modifying, or refactoring any UI component, page, layout, interaction, or user-facing copy, AI agents MUST inspect:
+
+1. [BRAND_PHILOSOPHY.md](./BRAND_PHILOSOPHY.md) — voice, tone, personality, emotional goals, and brand identity.
+2. [DESIGN.md](./DESIGN.md) — design tokens, typography, spacing, layout, component principles, motion, accessibility, and implementation rules.
+
+## Implementation Rules
+
+- **Token Compliance:** Use existing semantic design tokens instead of hardcoded colors or arbitrary values.
+- **Component Reuse:** Prefer composing or extending existing primitives before creating new components.
+- **Spacing Ownership:** Components control internal spacing. Parent layouts control positioning and relationships.
+- **Brand Compliance:** User-facing copy must follow [BRAND_PHILOSOPHY.md](./BRAND_PHILOSOPHY.md).
+- **Visual Consistency:** Do not introduce unrelated colors, typography, radius styles, shadows, or visual patterns.
+- **Motion Discipline:** Animation must follow the motion principles defined in [DESIGN.md](./DESIGN.md).
+- **Accessibility:** Preserve the accessibility requirements defined by the design system.
+- **System Evolution:** When a new UI requirement arises that is not covered by [DESIGN.md](./DESIGN.md), extend the design system intentionally rather than introducing ad-hoc visual styles.
+
+<!-- END:design-and-brand-rules -->
+
