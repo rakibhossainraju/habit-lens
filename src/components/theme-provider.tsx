@@ -8,12 +8,23 @@ import React, {
   useSyncExternalStore,
 } from "react";
 
+import { THEME_STORAGE_KEY } from "@/lib/theme";
+
 type Theme = "light" | "dark" | "system";
+type ResolvedTheme = "light" | "dark";
+
+// Populated by the blocking inline script in layout.tsx before React ever
+// runs, so the very first client render already agrees with the DOM.
+declare global {
+  interface Window {
+    __HL_THEME__?: { theme: Theme; resolvedTheme: ResolvedTheme };
+  }
+}
 
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  resolvedTheme: "light" | "dark";
+  resolvedTheme: ResolvedTheme;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -24,16 +35,24 @@ function subscribeToSystemTheme(callback: () => void) {
   return () => media.removeEventListener("change", callback);
 }
 
-function getSystemTheme(): "light" | "dark" {
+function getSystemTheme(): ResolvedTheme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function getServerSystemTheme(): "light" | "dark" {
-  return "dark";
+// Used for the server render and for the client's first (pre-hydration)
+// render. Reading the value the inline script already resolved means that
+// first client render matches what's already on screen instead of guessing.
+function getServerSystemTheme(): ResolvedTheme {
+  return (typeof window !== "undefined" && window.__HL_THEME__?.resolvedTheme) || "light";
+}
+
+function readInitialTheme(): Theme {
+  if (typeof window === "undefined") return "system";
+  return window.__HL_THEME__?.theme ?? "system";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("system");
+  const [theme, setThemeState] = useState<Theme>(readInitialTheme);
   const systemTheme = useSyncExternalStore(
     subscribeToSystemTheme,
     getSystemTheme,
@@ -42,22 +61,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const resolvedTheme = theme === "system" ? systemTheme : theme;
 
   useEffect(() => {
-    // localStorage isn't available during SSR, so the stored preference can
-    // only be read after mount.
-    const stored = localStorage.getItem("habit-lens-theme") as Theme | null;
-    if (stored && ["light", "dark", "system"].includes(stored)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setThemeState(stored);
-    }
-  }, []);
-
-  useEffect(() => {
     document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
   }, [resolvedTheme]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem("habit-lens-theme", newTheme);
+    localStorage.setItem(THEME_STORAGE_KEY, newTheme);
   };
 
   return (
