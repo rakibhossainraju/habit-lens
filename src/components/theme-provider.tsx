@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -12,32 +18,42 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+function subscribeToSystemTheme(callback: () => void) {
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  media.addEventListener("change", callback);
+  return () => media.removeEventListener("change", callback);
+}
+
+function getSystemTheme(): "light" | "dark" {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function getServerSystemTheme(): "light" | "dark" {
+  return "dark";
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("light");
+  const systemTheme = useSyncExternalStore(
+    subscribeToSystemTheme,
+    getSystemTheme,
+    getServerSystemTheme,
+  );
+  const resolvedTheme = theme === "system" ? systemTheme : theme;
 
   useEffect(() => {
+    // localStorage isn't available during SSR, so the stored preference can
+    // only be read after mount.
     const stored = localStorage.getItem("habit-lens-theme") as Theme | null;
     if (stored && ["light", "dark", "system"].includes(stored)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeState(stored);
     }
   }, []);
 
   useEffect(() => {
-    const root = document.documentElement;
-    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-
-    const effectiveTheme = theme === "system" ? systemTheme : theme;
-    setResolvedTheme(effectiveTheme);
-
-    if (effectiveTheme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-  }, [theme]);
+    document.documentElement.classList.toggle("dark", resolvedTheme === "dark");
+  }, [resolvedTheme]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
