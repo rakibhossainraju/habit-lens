@@ -56,7 +56,10 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className="min-h-full bg-background text-foreground font-sans">
+      <body
+        suppressHydrationWarning
+        className="min-h-full bg-background text-foreground font-sans"
+      >
         <ThemeProvider>
           <StorageProvider>
             <AppShell>{children}</AppShell>
