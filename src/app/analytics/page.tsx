@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import { BarChart3, Moon, Sun, Flame, Activity } from "lucide-react";
+import { Moon, Sun, Activity } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { TrendChartCard } from "@/components/trend-chart-card";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useStorage } from "@/lib/storage-context";
 

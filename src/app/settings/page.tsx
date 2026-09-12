@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Settings, Sun, Moon, Monitor, Download, RefreshCw, User, ShieldCheck } from "lucide-react";
+import { Sun, Moon, Monitor, Download, RefreshCw, User, ShieldCheck } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

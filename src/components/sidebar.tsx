@@ -9,8 +9,6 @@ import {
   BarChart3,
   Settings,
   PlusCircle,
-  ChevronLeft,
-  ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -28,10 +26,9 @@ const bottomNavItems = [
 
 interface SidebarProps {
   collapsed?: boolean;
-  onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
+export function Sidebar({ collapsed = false }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -61,18 +58,6 @@ export function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
             </div>
           )}
         </Link>
-
-        {onToggleCollapse && (
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={onToggleCollapse}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            {collapsed ? <ChevronRight className="size-4" /> : <ChevronLeft className="size-4" />}
-          </Button>
-        )}
       </div>
 
       {/* Quick Action Button */}
