@@ -6,11 +6,16 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useTheme } from "@/components/theme-provider";
+import { setTheme, type Theme } from "@/lib/theme";
 import { useStorage } from "@/lib/storage-context";
 
+const THEME_OPTIONS: { id: Theme; label: string; icon: typeof Sun }[] = [
+  { id: "light", label: "Light Theme", icon: Sun },
+  { id: "dark", label: "Dark Theme", icon: Moon },
+  { id: "system", label: "System Default", icon: Monitor },
+];
+
 export default function SettingsPage() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
   const { logs, resetToDefault } = useStorage();
 
   const [name, setName] = useState("Reflective Tracker");
@@ -98,33 +103,27 @@ export default function SettingsPage() {
             <CardTitle className="text-base font-medium">Appearance & Theme</CardTitle>
           </div>
           <CardDescription className="text-xs text-muted-foreground">
-            Customize the editorial serene visual environment (Current resolved: {resolvedTheme})
+            Customize the editorial serene visual environment (Current resolved:{" "}
+            <span className="dark:hidden">light</span>
+            <span className="hidden dark:inline">dark</span>)
           </CardDescription>
         </CardHeader>
         <CardContent className="p-5 pt-2">
           <div className="grid grid-cols-3 gap-3">
-            {[
-              { id: "light", label: "Light Theme", icon: Sun },
-              { id: "dark", label: "Dark Theme", icon: Moon },
-              { id: "system", label: "System Default", icon: Monitor },
-            ].map((item) => {
-              const isSelected = theme === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setTheme(item.id as "light" | "dark" | "system")}
-                  className={`flex flex-col items-center justify-center p-4 rounded-xl border transition-all text-xs font-mono gap-2 ${
-                    isSelected
-                      ? "bg-primary/10 border-primary text-primary font-semibold"
-                      : "bg-card border-border text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  <item.icon className="size-5" />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
+            {THEME_OPTIONS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                // The selected state is styled off this attribute rather than
+                // React state, so it is correct before the first paint.
+                data-theme-option={item.id}
+                onClick={() => setTheme(item.id)}
+                className="flex flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-4 font-mono text-xs text-muted-foreground transition-all hover:bg-muted theme-selected:border-primary theme-selected:bg-primary/10 theme-selected:font-semibold theme-selected:text-primary"
+              >
+                <item.icon className="size-5" />
+                <span>{item.label}</span>
+              </button>
+            ))}
           </div>
         </CardContent>
       </Card>
