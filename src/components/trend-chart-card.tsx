@@ -93,11 +93,19 @@ export function TrendChartCard({
       </CardHeader>
 
       <CardContent className="p-5 pt-2">
-        <div className="relative w-full overflow-x-auto">
-          <svg
-            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-            className="w-full h-auto min-w-[500px] select-none"
-          >
+        {chronological.length === 0 ? (
+          <div className="h-[180px] flex flex-col items-center justify-center text-center p-6 rounded-lg border border-dashed border-border bg-secondary/20">
+            <p className="text-xs font-medium text-foreground">No trend data recorded yet</p>
+            <p className="text-[11px] text-muted-foreground mt-1 max-w-xs leading-relaxed">
+              Daily entries will automatically populate this trend visualization over time.
+            </p>
+          </div>
+        ) : (
+          <div className="relative w-full overflow-x-auto">
+            <svg
+              viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+              className="w-full h-auto min-w-[500px] select-none"
+            >
             {/* Grid lines (0, 25%, 50%, 75%, 100%) */}
             {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
               const val = Math.round(maxVal * ratio);
@@ -250,8 +258,9 @@ export function TrendChartCard({
             })}
           </svg>
         </div>
+      )}
 
-        {/* Hover details summary bar */}
+      {/* Hover details summary bar */}
         {hoveredIdx !== null && chronological[hoveredIdx] && (
           <div className="mt-3 p-2.5 rounded-lg bg-muted/60 border border-border flex flex-wrap items-center justify-between text-xs font-mono">
             <span className="font-semibold text-foreground">

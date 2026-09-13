@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { INITIAL_LOG_ENTRIES, INITIAL_RULE_INSIGHTS } from "@/lib/mock-data";
+import { DEMO_LOG_ENTRIES, DEMO_RULE_INSIGHTS } from "@/lib/mock-data";
 
 const COLOR_TOKENS = [
   { name: "Primary", className: "bg-primary text-primary-foreground" },
@@ -149,7 +149,7 @@ export default function DesignSystemPage() {
           <MetricCard title="Streak" value={12} unit="days" icon={Flame} subtitle="logging streak" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {INITIAL_RULE_INSIGHTS.slice(0, 2).map((insight) => (
+          {DEMO_RULE_INSIGHTS.slice(0, 2).map((insight) => (
             <InsightCard key={insight.id} insight={insight} />
           ))}
         </div>
@@ -179,14 +179,14 @@ export default function DesignSystemPage() {
         <TrendChartCard
           title="Sleep Duration"
           description="Sample line chart rendered from mock log entries"
-          entries={INITIAL_LOG_ENTRIES}
+          entries={DEMO_LOG_ENTRIES}
           series={[{ key: "sleepDuration", label: "Sleep", colorVar: "var(--chart-1)", unit: "hrs" }]}
           maxVal={12}
         />
       </Section>
 
       <Section title="Log Table">
-        <LogTable logs={INITIAL_LOG_ENTRIES.slice(0, 4)} showFilters={false} />
+        <LogTable logs={DEMO_LOG_ENTRIES.slice(0, 4)} showFilters={false} />
       </Section>
 
       <Section title="Empty & Loading States">

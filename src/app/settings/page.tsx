@@ -16,12 +16,12 @@ const THEME_OPTIONS: { id: Theme; label: string; icon: typeof Sun }[] = [
 ];
 
 export default function SettingsPage() {
-  const { logs, resetToDefault } = useStorage();
+  const { logs, resetToDefault, clearAllLogs } = useStorage();
 
   const [name, setName] = useState("Reflective Tracker");
   const [email, setEmail] = useState("user@habitlens.app");
   const [targetSleep, setTargetSleep] = useState("8.0");
-  const [resetDone, setResetDone] = useState(false);
+  const [actionDone, setActionDone] = useState<string | null>(null);
 
   const handleExportData = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs, null, 2));
@@ -33,11 +33,19 @@ export default function SettingsPage() {
     downloadAnchor.remove();
   };
 
-  const handleReset = () => {
-    if (confirm("Reset all logs to initial mock data? Custom modifications will be reset.")) {
+  const handleResetToSample = () => {
+    if (confirm("Reset all logs to initial sample dataset from fixtures?")) {
       resetToDefault();
-      setResetDone(true);
-      setTimeout(() => setResetDone(false), 3000);
+      setActionDone("Sample Data Restored");
+      setTimeout(() => setActionDone(null), 3000);
+    }
+  };
+
+  const handleClearAll = () => {
+    if (confirm("Clear all recorded logs for a completely fresh start? This will delete all current logs.")) {
+      clearAllLogs();
+      setActionDone("All Data Cleared");
+      setTimeout(() => setActionDone(null), 3000);
     }
   };
 
@@ -147,20 +155,29 @@ export default function SettingsPage() {
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleExportData} className="gap-2 font-mono text-xs">
               <Download className="size-3.5" />
               <span>Export JSON</span>
             </Button>
 
             <Button
-              variant="destructive"
+              variant="outline"
               size="sm"
-              onClick={handleReset}
+              onClick={handleResetToSample}
               className="gap-2 font-mono text-xs"
             >
               <RefreshCw className="size-3.5" />
-              <span>{resetDone ? "Reset Complete" : "Reset Data"}</span>
+              <span>{actionDone === "Sample Data Restored" ? "Restored" : "Reset to Sample Data"}</span>
+            </Button>
+
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleClearAll}
+              className="gap-2 font-mono text-xs"
+            >
+              <span>{actionDone === "All Data Cleared" ? "Cleared" : "Clear All Data"}</span>
             </Button>
           </div>
         </CardContent>

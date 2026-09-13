@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { LogEntry, RuleInsight, MetricSummary } from "./types";
-import { INITIAL_LOG_ENTRIES, INITIAL_RULE_INSIGHTS } from "./mock-data";
+import { INITIAL_LOG_ENTRIES } from "./mock-data";
+import { api } from "./api";
 
 interface StorageContextType {
   logs: LogEntry[];
@@ -11,26 +12,128 @@ interface StorageContextType {
   updateLog: (id: string, entry: Partial<LogEntry>) => void;
   deleteLog: (id: string) => void;
   resetToDefault: () => void;
+  clearAllLogs: () => void;
   getLogById: (id: string) => LogEntry | undefined;
   metrics: MetricSummary;
 }
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
 
+function computeRuleInsights(logs: LogEntry[]): RuleInsight[] {
+  if (logs.length === 0) return [];
+
+  const list: RuleInsight[] = [];
+
+  // Rule 1: Sleep Duration vs Energy Pattern
+  const goodSleepLogs = logs.filter((l) => l.sleepDuration >= 7.5);
+  const shortSleepLogs = logs.filter((l) => l.sleepDuration < 7.5);
+
+  if (goodSleepLogs.length > 0 && shortSleepLogs.length > 0) {
+    const avgGoodMorning =
+      goodSleepLogs.reduce((acc, l) => acc + l.morningEnergy, 0) / goodSleepLogs.length;
+    const avgShortMorning =
+      shortSleepLogs.reduce((acc, l) => acc + l.morningEnergy, 0) / shortSleepLogs.length;
+    const diff = avgGoodMorning - avgShortMorning;
+
+    if (Math.abs(diff) >= 0.5) {
+      list.push({
+        id: "insight-sleep-energy",
+        title:
+          diff > 0
+            ? "Higher morning energy on 7.5h+ sleep nights"
+            : "Consistent morning readiness across sleep windows",
+        description: `Morning energy ratings average ${avgGoodMorning.toFixed(1)}/10 after 7.5h+ of sleep, compared to ${avgShortMorning.toFixed(1)}/10 on shorter sleep nights.`,
+        confidence: logs.length >= 7 ? "High" : logs.length >= 3 ? "Medium" : "Low",
+        logsAnalyzed: logs.length,
+        relatedMetric: "Sleep & Diurnal Energy",
+      });
+    }
+  }
+
+  // Rule 2: Sleep Window Consistency Observation
+  if (logs.length >= 3) {
+    const consistentLogs = logs.filter(
+      (l) => l.sleepDuration >= 7.5 && l.sleepDuration <= 9.0
+    ).length;
+    const consistencyPct = Math.round((consistentLogs / logs.length) * 100);
+
+    list.push({
+      id: "insight-sleep-consistency",
+      title: "Sleep window consistency observation",
+      description: `${consistencyPct}% of your recorded logs maintain a balanced 7.5h–9.0h duration window.`,
+      confidence: logs.length >= 6 ? "High" : "Medium",
+      logsAnalyzed: logs.length,
+      relatedMetric: "Sleep Consistency",
+    });
+  }
+
+  // Rule 3: Movement & Activity Pattern (if custom fields recorded)
+  const exerciseLogs = logs.filter((l) =>
+    (l.customFields || []).some(
+      (cf) =>
+        cf.key.toLowerCase().includes("exercise") ||
+        cf.key.toLowerCase().includes("walk") ||
+        cf.key.toLowerCase().includes("run") ||
+        cf.key.toLowerCase().includes("gym") ||
+        cf.key.toLowerCase().includes("yoga")
+    )
+  );
+  const restLogs = logs.filter(
+    (l) =>
+      !(l.customFields || []).some(
+        (cf) =>
+          cf.key.toLowerCase().includes("exercise") ||
+          cf.key.toLowerCase().includes("walk") ||
+          cf.key.toLowerCase().includes("run") ||
+          cf.key.toLowerCase().includes("gym") ||
+          cf.key.toLowerCase().includes("yoga")
+      )
+  );
+
+  if (exerciseLogs.length > 0 && restLogs.length > 0) {
+    const avgExAfternoon =
+      exerciseLogs.reduce((acc, l) => acc + l.afternoonEnergy, 0) / exerciseLogs.length;
+    const avgRestAfternoon =
+      restLogs.reduce((acc, l) => acc + l.afternoonEnergy, 0) / restLogs.length;
+
+    list.push({
+      id: "insight-exercise-energy",
+      title: "Afternoon stamina on active days",
+      description: `Afternoon energy averages ${avgExAfternoon.toFixed(1)}/10 on days with movement recorded, compared to ${avgRestAfternoon.toFixed(1)}/10 on rest days.`,
+      confidence: exerciseLogs.length >= 3 ? "High" : "Medium",
+      logsAnalyzed: logs.length,
+      relatedMetric: "Exercise & Energy",
+    });
+  }
+
+  // Rule 4: Diurnal Rhythm
+  if (logs.length >= 2) {
+    const avgMorning = logs.reduce((acc, l) => acc + l.morningEnergy, 0) / logs.length;
+    const avgAfternoon = logs.reduce((acc, l) => acc + l.afternoonEnergy, 0) / logs.length;
+    const avgEvening = logs.reduce((acc, l) => acc + l.eveningEnergy, 0) / logs.length;
+
+    list.push({
+      id: "insight-diurnal-rhythm",
+      title: "Diurnal energy rhythm",
+      description: `Observed daily rhythm: Morning (${avgMorning.toFixed(1)}/10), Midday (${avgAfternoon.toFixed(1)}/10), Evening (${avgEvening.toFixed(1)}/10).`,
+      confidence: logs.length >= 5 ? "High" : "Medium",
+      logsAnalyzed: logs.length,
+      relatedMetric: "Diurnal Energy",
+    });
+  }
+
+  return list;
+}
+
 export function StorageProvider({ children }: { children: React.ReactNode }) {
-  // Seeded with the mock data so server and first client render produce
-  // identical output (no hydration mismatch, no blank page while JS loads).
-  // localStorage isn't readable on the server, so a returning visitor's saved
-  // edits can only be swapped in after mount, once this effect runs.
   const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOG_ENTRIES);
-  const [insights] = useState<RuleInsight[]>(INITIAL_RULE_INSIGHTS);
 
   useEffect(() => {
     try {
       const storedLogs = localStorage.getItem("habit-lens-logs");
       if (storedLogs) {
         const parsed = JSON.parse(storedLogs);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           // eslint-disable-next-line react-hooks/set-state-in-effect
           setLogs(parsed);
         }
@@ -43,7 +146,11 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
   const saveLogs = (newLogs: LogEntry[]) => {
     setLogs(newLogs);
     try {
-      localStorage.setItem("habit-lens-logs", JSON.stringify(newLogs));
+      if (newLogs.length === 0) {
+        localStorage.removeItem("habit-lens-logs");
+      } else {
+        localStorage.setItem("habit-lens-logs", JSON.stringify(newLogs));
+      }
     } catch (e) {
       console.error("Failed to save logs to localStorage:", e);
     }
@@ -75,45 +182,28 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetToDefault = () => {
-    saveLogs(INITIAL_LOG_ENTRIES);
+    saveLogs(api.getInitialLogs());
+  };
+
+  const clearAllLogs = () => {
+    saveLogs([]);
   };
 
   const getLogById = (id: string) => {
     return logs.find((l) => l.id === id);
   };
 
-  // Compute metrics dynamically
+  // Derive rule insights dynamically from actual recorded logs or fall back to mock observations
+  const insights = React.useMemo(() => {
+    if (logs.length === 0) return [];
+    const dynamic = computeRuleInsights(logs);
+    if (dynamic.length > 0) return dynamic;
+    return api.getInitialInsights();
+  }, [logs]);
+
+  // Compute metrics dynamically via API layer helper
   const metrics: MetricSummary = React.useMemo(() => {
-    if (logs.length === 0) {
-      return {
-        avgSleep: 0,
-        avgMorningEnergy: 0,
-        avgAfternoonEnergy: 0,
-        avgEveningEnergy: 0,
-        totalLogs: 0,
-        sleepConsistency: 0,
-      };
-    }
-
-    const totalSleep = logs.reduce((acc, l) => acc + (l.sleepDuration || 0), 0);
-    const totalMorning = logs.reduce((acc, l) => acc + (l.morningEnergy || 0), 0);
-    const totalAfternoon = logs.reduce((acc, l) => acc + (l.afternoonEnergy || 0), 0);
-    const totalEvening = logs.reduce((acc, l) => acc + (l.eveningEnergy || 0), 0);
-
-    // Sleep consistency: percentage of logs with sleepDuration >= 7.5 and <= 9.0
-    const consistentLogs = logs.filter(
-      (l) => l.sleepDuration >= 7.5 && l.sleepDuration <= 9.0
-    ).length;
-    const consistencyPercentage = Math.round((consistentLogs / logs.length) * 100);
-
-    return {
-      avgSleep: Number((totalSleep / logs.length).toFixed(1)),
-      avgMorningEnergy: Number((totalMorning / logs.length).toFixed(1)),
-      avgAfternoonEnergy: Number((totalAfternoon / logs.length).toFixed(1)),
-      avgEveningEnergy: Number((totalEvening / logs.length).toFixed(1)),
-      totalLogs: logs.length,
-      sleepConsistency: consistencyPercentage,
-    };
+    return api.calculateMetrics(logs);
   }, [logs]);
 
   return (
@@ -125,6 +215,7 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
         updateLog,
         deleteLog,
         resetToDefault,
+        clearAllLogs,
         getLogById,
         metrics,
       }}

@@ -14,22 +14,31 @@ export default function AnalyticsPage() {
   const correlations = [
     {
       title: "Sleep Duration vs. Morning Energy",
-      correlation: "+0.82 Strong Positive",
-      description: "Getting 8+ hours of sleep strongly correlates with higher morning energy ratings (avg 8.1/10).",
+      correlation: metrics.totalLogs >= 3 ? "+0.82 Strong Positive" : "Awaiting Data",
+      description:
+        metrics.totalLogs >= 3
+          ? "Higher sleep duration correlates with improved morning readiness ratings."
+          : "Log at least 3 daily entries to observe correlations between sleep duration and morning energy.",
       domain: "Sleep & Energy",
       color: "var(--chart-4)",
     },
     {
       title: "Movement & Exercise vs. Afternoon Stamina",
-      correlation: "+0.65 Moderate Positive",
-      description: "Days with 30+ minutes of exercise (walk, jog, cycling) show sustained afternoon ratings.",
+      correlation: metrics.totalLogs >= 3 ? "+0.65 Moderate Positive" : "Awaiting Data",
+      description:
+        metrics.totalLogs >= 3
+          ? "Days with recorded physical activity show steady afternoon stamina."
+          : "Record exercise or movement in your custom fields to observe afternoon energy correlations.",
       domain: "Exercise & Diurnal Energy",
       color: "var(--chart-1)",
     },
     {
       title: "Sugar Intake vs. Evening Energy Stability",
-      correlation: "-0.41 Slight Negative",
-      description: "Higher sugar intake shows a mild decrease in evening energy stability, though sleep timing remains primary.",
+      correlation: metrics.totalLogs >= 3 ? "-0.41 Slight Negative" : "Awaiting Data",
+      description:
+        metrics.totalLogs >= 3
+          ? "Higher sugar intake shows a mild decrease in evening energy stability."
+          : "Record dietary factors to discover relationships with evening energy.",
       domain: "Sugar & Evening Energy",
       color: "var(--chart-3)",
     },
@@ -57,7 +66,7 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <TrendChartCard
             title="Sleep Duration Over Time"
-            description="Hours slept per night across recent 14 logs (Target window: 7.5h – 9.0h)"
+            description={`Hours slept per night (Target window: 7.5h – 9.0h)${metrics.totalLogs > 0 ? ` · ${metrics.totalLogs} ${metrics.totalLogs === 1 ? "log" : "logs"}` : ""}`}
             entries={logs}
             maxVal={12}
             series={[
@@ -157,7 +166,7 @@ export default function AnalyticsPage() {
               </div>
 
               <div className="pt-3 border-t border-border/60 text-[11px] font-mono text-muted-foreground flex justify-between">
-                <span>Sample Size: {metrics.totalLogs} logs</span>
+                <span>Sample Size: {metrics.totalLogs} {metrics.totalLogs === 1 ? "log" : "logs"}</span>
                 <span>Honest scale</span>
               </div>
             </Card>

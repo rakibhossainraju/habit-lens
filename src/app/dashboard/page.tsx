@@ -71,34 +71,34 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
           title="Avg Sleep Duration"
-          value={metrics.avgSleep}
-          unit="hrs"
-          subtitle="Based on recent 14 logs"
+          value={metrics.totalLogs > 0 ? metrics.avgSleep : "—"}
+          unit={metrics.totalLogs > 0 ? "hrs" : undefined}
+          subtitle={metrics.totalLogs > 0 ? `Based on ${metrics.totalLogs} ${metrics.totalLogs === 1 ? "log" : "logs"}` : "No logs recorded yet"}
           icon={Moon}
-          trend="8.0h Target"
+          trend={metrics.totalLogs > 0 ? "8.0h Target" : "8.0h Target"}
         />
         <MetricCard
           title="Avg Morning Energy"
-          value={metrics.avgMorningEnergy}
-          unit="/ 10"
-          subtitle="Diurnal start clarity"
+          value={metrics.totalLogs > 0 ? metrics.avgMorningEnergy : "—"}
+          unit={metrics.totalLogs > 0 ? "/ 10" : undefined}
+          subtitle={metrics.totalLogs > 0 ? "Diurnal start clarity" : "No logs recorded yet"}
           icon={Sun}
-          trend="7.4/10 Avg"
+          trend={metrics.totalLogs > 0 ? `${metrics.avgMorningEnergy}/10 Avg` : "No baseline"}
         />
         <MetricCard
           title="Avg Afternoon Energy"
-          value={metrics.avgAfternoonEnergy}
-          unit="/ 10"
-          subtitle="Midday stamina"
+          value={metrics.totalLogs > 0 ? metrics.avgAfternoonEnergy : "—"}
+          unit={metrics.totalLogs > 0 ? "/ 10" : undefined}
+          subtitle={metrics.totalLogs > 0 ? "Midday stamina" : "No logs recorded yet"}
           icon={SunMedium}
-          trend="6.8/10 Avg"
+          trend={metrics.totalLogs > 0 ? `${metrics.avgAfternoonEnergy}/10 Avg` : "No baseline"}
         />
         <MetricCard
           title="Sleep Consistency"
-          value={`${metrics.sleepConsistency}%`}
+          value={metrics.totalLogs > 0 ? `${metrics.sleepConsistency}%` : "—"}
           subtitle="7.5h–9.0h optimal window"
           icon={Sunset}
-          trend={`${metrics.totalLogs} Logs`}
+          trend={`${metrics.totalLogs} ${metrics.totalLogs === 1 ? "Log" : "Logs"}`}
         />
       </div>
 
@@ -107,7 +107,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2">
           <TrendChartCard
             title="Diurnal Energy & Sleep Trends"
-            description="14-day chronological progression of sleep duration and energy ratings"
+            description="Chronological progression of sleep duration and energy ratings"
             entries={logs}
             maxVal={10}
             series={[
@@ -138,19 +138,35 @@ export default function DashboardPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-medium text-foreground">Latest Insights</h2>
-            <Link
-              href="/insights"
-              className="text-xs font-mono text-muted-foreground hover:text-primary flex items-center gap-1"
-            >
-              <span>View all ({insights.length})</span>
-              <ArrowRight className="size-3" />
-            </Link>
+            {insights.length > 0 && (
+              <Link
+                href="/insights"
+                className="text-xs font-mono text-muted-foreground hover:text-primary flex items-center gap-1"
+              >
+                <span>View all ({insights.length})</span>
+                <ArrowRight className="size-3" />
+              </Link>
+            )}
           </div>
 
           <div className="space-y-4">
-            {insights.slice(0, 2).map((insight) => (
-              <InsightCard key={insight.id} insight={insight} />
-            ))}
+            {insights.length === 0 ? (
+              <Card className="p-6 text-center border-dashed border-border bg-secondary/15">
+                <p className="text-sm font-medium text-foreground">No insights yet</p>
+                <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                  Rule-based observations will emerge here as you record daily entries.
+                </p>
+                <Link href="/logs/new" className="inline-block mt-3">
+                  <Button variant="outline" size="sm" className="text-xs">
+                    Record First Entry
+                  </Button>
+                </Link>
+              </Card>
+            ) : (
+              insights.slice(0, 2).map((insight) => (
+                <InsightCard key={insight.id} insight={insight} />
+              ))
+            )}
           </div>
         </div>
       </div>

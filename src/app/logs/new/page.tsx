@@ -31,10 +31,7 @@ export default function NewLogPage() {
   const [afternoonEnergy, setAfternoonEnergy] = useState<number>(7);
   const [eveningEnergy, setEveningEnergy] = useState<number>(6);
   const [notes, setNotes] = useState<string>("");
-  const [customFields, setCustomFields] = useState<CustomField[]>([
-    { key: "Exercise", value: "30 min Walk" },
-    { key: "Water Intake", value: "2.0 L" },
-  ]);
+  const [customFields, setCustomFields] = useState<CustomField[]>([]);
 
   const [submitted, setSubmitted] = useState(false);
 

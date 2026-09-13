@@ -47,7 +47,14 @@ export default function InsightsPage() {
       </div>
 
       {/* Insights Cards Grid */}
-      {filtered.length === 0 ? (
+      {insights.length === 0 ? (
+        <EmptyState
+          title="No rule-based insights yet"
+          description="Start recording your daily sleep, diurnal energy, and lifestyle habits. As patterns emerge, Habit Lens will surface observations here."
+          actionLabel="Log Today's Entry"
+          actionHref="/logs/new"
+        />
+      ) : filtered.length === 0 ? (
         <EmptyState
           title="No insights match this filter"
           description="Try selecting 'All Confidence' to view all rule-based observations."
