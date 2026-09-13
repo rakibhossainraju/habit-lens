@@ -128,6 +128,27 @@ Tokens are defined using OKLCH color space for perceptually balanced lightness a
 }
 ```
 
+### Theme Application
+
+The theme is DOM state, never React state — the server cannot read `localStorage`
+or the OS colour scheme, so any component that renders from a theme value
+disagrees with the server's HTML. A blocking script in `<head>` (see
+`src/lib/theme.ts`) writes two things to `<html>` before the first paint:
+
+| Attribute | Meaning | Used by |
+| :--- | :--- | :--- |
+| `.dark` | The **resolved** appearance | `dark:` variant, dark token block |
+| `data-theme="light \| dark \| system"` | The **stored** preference | `theme-selected:` variant |
+
+Style preference-dependent UI with these variants rather than a React value:
+
+- `dark:` — anything that differs between light and dark appearance.
+- `theme-selected:` — the option in a theme picker matching the stored
+  preference. Mark each option with `data-theme-option="light \| dark \| system"`.
+
+`setTheme()` / `toggleTheme()` from `src/lib/theme.ts` are plain event
+handlers; they write the preference and update `<html>`, and CSS does the rest.
+
 ---
 
 ## 4. Foundational Chart System

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import { Sidebar } from "./sidebar";
 import { TopNav } from "./top-nav";
 import { cn } from "@/lib/utils";
@@ -10,10 +10,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <Sidebar
-        collapsed={collapsed}
-        onToggleCollapse={() => setCollapsed(!collapsed)}
-      />
+      {/* Sidebar reads the current pathname to highlight the active link, which
+          is per-request data on routes without generateStaticParams (e.g.
+          /logs/[id]) — Suspense keeps that from blocking the static shell. */}
+      <Suspense fallback={<div className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-sidebar" />}>
+        <Sidebar collapsed={collapsed} />
+      </Suspense>
       <div
         className={cn(
           "flex-1 flex flex-col transition-all duration-200 ease-in-out",

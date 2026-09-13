@@ -14,7 +14,7 @@ import {
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
-import { Search, Eye, Edit3, Trash2, Calendar, Moon, Sun } from "lucide-react";
+import { Search, Eye, Trash2, Calendar, Moon } from "lucide-react";
 import { EmptyState } from "./empty-state";
 
 interface LogTableProps {

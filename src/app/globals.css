@@ -4,6 +4,12 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Matches the option in a theme picker that corresponds to the stored
+   preference on <html>. Keeps preference-dependent styling in CSS, where it
+   can be right before first paint, instead of in React state, which the
+   server cannot know. */
+@custom-variant theme-selected (&:is([data-theme="light"] [data-theme-option="light"], [data-theme="dark"] [data-theme-option="dark"], [data-theme="system"] [data-theme-option="system"]));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

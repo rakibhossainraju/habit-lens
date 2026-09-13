@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, Plus, Trash2, CheckCircle2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -11,7 +11,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { useStorage } from "@/lib/storage-context";
 import { CustomField } from "@/lib/types";
 
@@ -19,9 +18,13 @@ export default function NewLogPage() {
   const router = useRouter();
   const { addLog } = useStorage();
 
-  const [date, setDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  );
+  // `new Date()` isn't deterministic across server/client renders, so today's
+  // date is resolved client-side only, after mount.
+  const [date, setDate] = useState<string>("");
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setDate(new Date().toISOString().split("T")[0]);
+  }, []);
   const [sleepTime, setSleepTime] = useState<string>("22:30");
   const [wakeTime, setWakeTime] = useState<string>("06:30");
   const [morningEnergy, setMorningEnergy] = useState<number>(7);
@@ -41,7 +44,7 @@ export default function NewLogPage() {
     const [sH, sM] = sleepTime.split(":").map(Number);
     const [wH, wM] = wakeTime.split(":").map(Number);
 
-    let start = sH * 60 + sM;
+    const start = sH * 60 + sM;
     let end = wH * 60 + wM;
 
     if (end <= start) {
@@ -235,7 +238,7 @@ export default function NewLogPage() {
 
               {customFields.length === 0 ? (
                 <p className="text-xs text-muted-foreground italic text-center py-4">
-                  No custom fields added yet. Click "Add Field" or select a suggestion above.
+                  No custom fields added yet. Click &ldquo;Add Field&rdquo; or select a suggestion above.
                 </p>
               ) : (
                 <div className="space-y-3">

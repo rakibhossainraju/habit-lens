@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Search, Sun, Moon, PanelLeft, User } from "lucide-react";
-import { useTheme } from "./theme-provider";
+import { toggleTheme } from "@/lib/theme";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
@@ -11,12 +11,7 @@ interface TopNavProps {
 }
 
 export function TopNav({ onToggleSidebar }: TopNavProps) {
-  const { resolvedTheme, setTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
-
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
-  };
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-colors">
@@ -54,14 +49,13 @@ export function TopNav({ onToggleSidebar }: TopNavProps) {
           variant="ghost"
           size="icon-sm"
           onClick={toggleTheme}
-          aria-label={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
-          title={`Switch to ${resolvedTheme === "dark" ? "light" : "dark"} mode`}
+          aria-label="Toggle theme"
+          title="Toggle theme"
         >
-          {resolvedTheme === "dark" ? (
-            <Sun className="size-4 text-accent-foreground" />
-          ) : (
-            <Moon className="size-4 text-muted-foreground" />
-          )}
+          {/* Both icons ship in the markup; the `dark` class the theme script
+              sets before first paint decides which one shows. */}
+          <Moon className="size-4 text-muted-foreground dark:hidden" />
+          <Sun className="hidden size-4 text-accent-foreground dark:block" />
         </Button>
 
         {/* User Menu Avatar */}

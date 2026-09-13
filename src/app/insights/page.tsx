@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Lightbulb, Filter } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { InsightCard } from "@/components/insight-card";
-import { Button } from "@/components/ui/button";
 import { useStorage } from "@/lib/storage-context";
 import { EmptyState } from "@/components/empty-state";
 
