@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { PlusCircle, History } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { LogTable } from "@/components/log-table";
 import { Button } from "@/components/ui/button";

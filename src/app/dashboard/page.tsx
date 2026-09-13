@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { PlusCircle, Moon, Sun, SunMedium, Sunset, Sparkles, ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
@@ -9,15 +9,21 @@ import { InsightCard } from "@/components/insight-card";
 import { TrendChartCard } from "@/components/trend-chart-card";
 import { LogTable } from "@/components/log-table";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useStorage } from "@/lib/storage-context";
 
 export default function DashboardPage() {
   const { logs, insights, metrics, deleteLog } = useStorage();
 
-  const todayLog = logs.find(
-    (l) => l.date === new Date().toISOString().split("T")[0]
-  );
+  // `new Date()` isn't deterministic across server/client renders, so "today"
+  // is resolved client-side only, after mount.
+  const [todayDate, setTodayDate] = useState<string | null>(null);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTodayDate(new Date().toISOString().split("T")[0]);
+  }, []);
+
+  const todayLog = todayDate ? logs.find((l) => l.date === todayDate) : undefined;
 
   return (
     <div className="space-y-8">

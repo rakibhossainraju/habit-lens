@@ -18,9 +18,12 @@ interface StorageContextType {
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
 
 export function StorageProvider({ children }: { children: React.ReactNode }) {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  // Seeded with the mock data so server and first client render produce
+  // identical output (no hydration mismatch, no blank page while JS loads).
+  // localStorage isn't readable on the server, so a returning visitor's saved
+  // edits can only be swapped in after mount, once this effect runs.
+  const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOG_ENTRIES);
   const [insights] = useState<RuleInsight[]>(INITIAL_RULE_INSIGHTS);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     try {
@@ -28,16 +31,13 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
       if (storedLogs) {
         const parsed = JSON.parse(storedLogs);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setLogs(parsed);
-          setIsLoaded(true);
-          return;
         }
       }
     } catch (e) {
       console.error("Failed to load stored logs:", e);
     }
-    setLogs(INITIAL_LOG_ENTRIES);
-    setIsLoaded(true);
   }, []);
 
   const saveLogs = (newLogs: LogEntry[]) => {
@@ -115,10 +115,6 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
       sleepConsistency: consistencyPercentage,
     };
   }, [logs]);
-
-  if (!isLoaded) {
-    return null; // Prevents SSR hydration mismatch
-  }
 
   return (
     <StorageContext.Provider
