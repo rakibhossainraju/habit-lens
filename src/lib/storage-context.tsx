@@ -2,19 +2,20 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { LogEntry, RuleInsight, MetricSummary } from "./types";
-import { INITIAL_LOG_ENTRIES } from "./mock-data";
 import { api } from "./api";
 
-interface StorageContextType {
+export interface StorageContextType {
   logs: LogEntry[];
   insights: RuleInsight[];
-  addLog: (entry: Omit<LogEntry, "id" | "createdAt">) => LogEntry;
-  updateLog: (id: string, entry: Partial<LogEntry>) => void;
-  deleteLog: (id: string) => void;
+  isLoading: boolean;
+  addLog: (entry: Omit<LogEntry, "id" | "createdAt">) => Promise<LogEntry> | LogEntry;
+  updateLog: (id: string, entry: Partial<LogEntry>) => Promise<void> | void;
+  deleteLog: (id: string) => Promise<void> | void;
   resetToDefault: () => void;
   clearAllLogs: () => void;
   getLogById: (id: string) => LogEntry | undefined;
   metrics: MetricSummary;
+  refresh: () => Promise<void>;
 }
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
@@ -126,80 +127,107 @@ function computeRuleInsights(logs: LogEntry[]): RuleInsight[] {
 }
 
 export function StorageProvider({ children }: { children: React.ReactNode }) {
-  const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOG_ENTRIES);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const [apiInsights, setApiInsights] = useState<RuleInsight[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
+  const refresh = React.useCallback(async () => {
+    setIsLoading(true);
     try {
-      const storedLogs = localStorage.getItem("habit-lens-logs");
-      if (storedLogs) {
-        const parsed = JSON.parse(storedLogs);
-        if (Array.isArray(parsed)) {
-          // eslint-disable-next-line react-hooks/set-state-in-effect
-          setLogs(parsed);
-        }
+      const [logsRes, insightsRes] = await Promise.all([
+        api.fetchLogs(),
+        api.fetchInsights(),
+      ]);
+      if (logsRes.success && Array.isArray(logsRes.data)) {
+        setLogs(logsRes.data);
+      }
+      if (insightsRes.success && Array.isArray(insightsRes.data)) {
+        setApiInsights(insightsRes.data);
       }
     } catch (e) {
-      console.error("Failed to load stored logs:", e);
+      console.error("Failed to load data from API:", e);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  const saveLogs = (newLogs: LogEntry[]) => {
-    setLogs(newLogs);
+  useEffect(() => {
+    // Clear any legacy localStorage mock logs so frontend is 100% dependent on API
     try {
-      if (newLogs.length === 0) {
-        localStorage.removeItem("habit-lens-logs");
-      } else {
-        localStorage.setItem("habit-lens-logs", JSON.stringify(newLogs));
-      }
-    } catch (e) {
-      console.error("Failed to save logs to localStorage:", e);
+      localStorage.removeItem("habit-lens-logs");
+    } catch {
+      // Ignore
+    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refresh();
+  }, [refresh]);
+
+  const addLog = async (entry: Omit<LogEntry, "id" | "createdAt">): Promise<LogEntry> => {
+    try {
+      const res = await api.createLog(entry);
+      const newEntry = res.data;
+      setLogs((prev) => {
+        const updated = [newEntry, ...prev];
+        updated.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        return updated;
+      });
+      return newEntry;
+    } catch (error) {
+      console.error("Failed to add log:", error);
+      const fallbackEntry: LogEntry = {
+        ...entry,
+        id: `log-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+      };
+      setLogs((prev) => [fallbackEntry, ...prev]);
+      return fallbackEntry;
     }
   };
 
-  const addLog = (entry: Omit<LogEntry, "id" | "createdAt">): LogEntry => {
-    const newEntry: LogEntry = {
-      ...entry,
-      id: `log-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [newEntry, ...logs];
-    // Sort by date descending
-    updated.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    saveLogs(updated);
-    return newEntry;
-  };
-
-  const updateLog = (id: string, updatedFields: Partial<LogEntry>) => {
-    const updated = logs.map((log) =>
-      log.id === id ? { ...log, ...updatedFields } : log
+  const updateLog = async (id: string, updatedFields: Partial<LogEntry>) => {
+    const current = logs.find((l) => l.id === id);
+    if (current) {
+      try {
+        await api.updateLog(current, updatedFields);
+      } catch (e) {
+        console.error("Failed to update log on API:", e);
+      }
+    }
+    setLogs((prev) =>
+      prev.map((log) => (log.id === id ? { ...log, ...updatedFields } : log))
     );
-    saveLogs(updated);
   };
 
-  const deleteLog = (id: string) => {
-    const updated = logs.filter((log) => log.id !== id);
-    saveLogs(updated);
+  const deleteLog = async (id: string) => {
+    try {
+      await api.deleteLog(id);
+    } catch (e) {
+      console.error("Failed to delete log on API:", e);
+    }
+    setLogs((prev) => prev.filter((log) => log.id !== id));
   };
 
   const resetToDefault = () => {
-    saveLogs(api.getInitialLogs());
+    setLogs(api.getInitialLogs());
   };
 
   const clearAllLogs = () => {
-    saveLogs([]);
+    setLogs([]);
   };
 
   const getLogById = (id: string) => {
     return logs.find((l) => l.id === id);
   };
 
-  // Derive rule insights dynamically from actual recorded logs or fall back to mock observations
+  // Derive rule insights dynamically from actual recorded logs or fall back to API insights
   const insights = React.useMemo(() => {
-    if (logs.length === 0) return [];
+    if (logs.length === 0) {
+      return apiInsights;
+    }
     const dynamic = computeRuleInsights(logs);
     if (dynamic.length > 0) return dynamic;
-    return api.getInitialInsights();
-  }, [logs]);
+    return apiInsights;
+  }, [logs, apiInsights]);
 
   // Compute metrics dynamically via API layer helper
   const metrics: MetricSummary = React.useMemo(() => {
@@ -211,6 +239,7 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
       value={{
         logs,
         insights,
+        isLoading,
         addLog,
         updateLog,
         deleteLog,
@@ -218,6 +247,7 @@ export function StorageProvider({ children }: { children: React.ReactNode }) {
         clearAllLogs,
         getLogById,
         metrics,
+        refresh,
       }}
     >
       {children}

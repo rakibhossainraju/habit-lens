@@ -11,22 +11,39 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useStorage } from "@/lib/storage-context";
 import { EmptyState } from "@/components/empty-state";
+import { LoadingState } from "@/components/loading-state";
 
 export function LogDetailClient({ id }: { id: string }) {
   const router = useRouter();
-  const { getLogById, updateLog, deleteLog } = useStorage();
+  const { getLogById, updateLog, deleteLog, isLoading } = useStorage();
 
   const log = getLogById(id);
 
   const [isEditing, setIsEditing] = useState(false);
 
   // Form edit states
-  const [editNotes, setEditNotes] = useState(log?.notes || "");
-  const [editSleepTime, setEditSleepTime] = useState(log?.sleepTime || "");
-  const [editWakeTime, setEditWakeTime] = useState(log?.wakeTime || "");
-  const [editMorning, setEditMorning] = useState(log?.morningEnergy ?? 7);
-  const [editAfternoon, setEditAfternoon] = useState(log?.afternoonEnergy ?? 7);
-  const [editEvening, setEditEvening] = useState(log?.eveningEnergy ?? 6);
+  const [editNotes, setEditNotes] = useState("");
+  const [editSleepTime, setEditSleepTime] = useState("");
+  const [editWakeTime, setEditWakeTime] = useState("");
+  const [editMorning, setEditMorning] = useState(7);
+  const [editAfternoon, setEditAfternoon] = useState(7);
+  const [editEvening, setEditEvening] = useState(6);
+
+  const handleStartEdit = () => {
+    if (log) {
+      setEditNotes(log.notes || "");
+      setEditSleepTime(log.sleepTime || "");
+      setEditWakeTime(log.wakeTime || "");
+      setEditMorning(log.morningEnergy);
+      setEditAfternoon(log.afternoonEnergy);
+      setEditEvening(log.eveningEnergy);
+      setIsEditing(true);
+    }
+  };
+
+  if (isLoading) {
+    return <LoadingState rows={4} />;
+  }
 
   if (!log) {
     return (
@@ -104,7 +121,7 @@ export function LogDetailClient({ id }: { id: string }) {
             <Button
               variant="default"
               size="sm"
-              onClick={() => setIsEditing(true)}
+              onClick={handleStartEdit}
               className="gap-2"
             >
               <Edit3 className="size-3.5" />

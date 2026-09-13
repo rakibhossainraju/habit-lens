@@ -4,12 +4,17 @@ import React from "react";
 import { Moon, Sun, Activity } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { TrendChartCard } from "@/components/trend-chart-card";
+import { LoadingState } from "@/components/loading-state";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useStorage } from "@/lib/storage-context";
 
 export default function AnalyticsPage() {
-  const { logs, metrics } = useStorage();
+  const { logs, metrics, isLoading } = useStorage();
+
+  if (isLoading) {
+    return <LoadingState rows={5} />;
+  }
 
   const correlations = [
     {

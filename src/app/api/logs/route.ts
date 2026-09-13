@@ -10,8 +10,8 @@ export async function GET(): Promise<NextResponse<ApiResponseDTO<LogEntryDTO[]>>
   const dtos: LogEntryDTO[] = mockLogsFixture;
   return NextResponse.json({
     success: true,
-    data: dtos,
-    total: dtos.length,
+    data: [],
+    total: 0,
     timestamp: new Date().toISOString(),
   });
 }

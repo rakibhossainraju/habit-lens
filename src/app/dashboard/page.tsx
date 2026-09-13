@@ -8,12 +8,13 @@ import { MetricCard } from "@/components/metric-card";
 import { InsightCard } from "@/components/insight-card";
 import { TrendChartCard } from "@/components/trend-chart-card";
 import { LogTable } from "@/components/log-table";
+import { LoadingState } from "@/components/loading-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useStorage } from "@/lib/storage-context";
 
 export default function DashboardPage() {
-  const { logs, insights, metrics, deleteLog } = useStorage();
+  const { logs, insights, metrics, deleteLog, isLoading } = useStorage();
 
   // `new Date()` isn't deterministic across server/client renders, so "today"
   // is resolved client-side only, after mount.
@@ -24,6 +25,10 @@ export default function DashboardPage() {
   }, []);
 
   const todayLog = todayDate ? logs.find((l) => l.date === todayDate) : undefined;
+
+  if (isLoading) {
+    return <LoadingState rows={4} />;
+  }
 
   return (
     <div className="space-y-8">

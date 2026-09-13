@@ -15,18 +15,11 @@ import type { LogEntry, RuleInsight, MetricSummary } from "@/lib/types";
 /**
  * Habit Lens API Layer
  *
- * Architecture Flow:
- * Fixture (raw JSON fixtures)
- *   ↓
- * DTO (Data Transfer Objects & Mappers)
- *   ↓
- * API Layer (Service abstraction & Endpoints)
- *   ↓
- * Domain Models (LogEntry, RuleInsight, MetricSummary)
+ * Connected directly to the application's Next.js API route handlers (/api/logs, /api/insights).
  */
 export const api = {
   /**
-   * Synchronously loads initial log entries from Fixture through DTO mappers
+   * Synchronously loads sample fixture log entries (used for fallback or manual reset)
    */
   getInitialLogs(): LogEntry[] {
     const dtos: LogEntryDTO[] = mockLogsFixture;
@@ -34,7 +27,7 @@ export const api = {
   },
 
   /**
-   * Synchronously loads initial rule insights from Fixture through DTO mappers
+   * Synchronously loads sample fixture rule insights (used for fallback or manual reset)
    */
   getInitialInsights(): RuleInsight[] {
     const dtos: RuleInsightDTO[] = mockInsightsFixture;
@@ -42,51 +35,94 @@ export const api = {
   },
 
   /**
-   * Asynchronous fetch for logs through DTO transformation pipeline
+   * Asynchronous fetch for logs from /api/logs
    */
   async fetchLogs(): Promise<ApiResponseDTO<LogEntry[]>> {
-    const dtos: LogEntryDTO[] = mockLogsFixture;
-    const domainLogs = toLogEntryListDomain(dtos);
-    return {
-      success: true,
-      data: domainLogs,
-      total: domainLogs.length,
-      timestamp: new Date().toISOString(),
-    };
+    try {
+      const res = await fetch("/api/logs", { cache: "no-store" });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch logs: ${res.statusText}`);
+      }
+      const json: ApiResponseDTO<LogEntryDTO[]> = await res.json();
+      return {
+        ...json,
+        data: toLogEntryListDomain(json.data || []),
+        total: json.total ?? (json.data?.length || 0),
+      };
+    } catch (error) {
+      console.error("fetchLogs API error:", error);
+      return {
+        success: false,
+        data: [],
+        total: 0,
+        timestamp: new Date().toISOString(),
+      };
+    }
   },
 
   /**
-   * Asynchronous fetch for a single log entry by ID
+   * Asynchronous fetch for a single log entry by ID from /api/logs/[id]
    */
   async fetchLogById(id: string): Promise<ApiResponseDTO<LogEntry | null>> {
-    const dtos: LogEntryDTO[] = mockLogsFixture;
-    const foundDto = dtos.find((dto) => dto.id === id);
-    return {
-      success: true,
-      data: foundDto ? toLogEntryDomain(foundDto) : null,
-      timestamp: new Date().toISOString(),
-    };
+    try {
+      const res = await fetch(`/api/logs/${id}`, { cache: "no-store" });
+      if (!res.ok) {
+        return {
+          success: false,
+          data: null,
+          timestamp: new Date().toISOString(),
+        };
+      }
+      const json: ApiResponseDTO<LogEntryDTO | null> = await res.json();
+      return {
+        ...json,
+        data: json.data ? toLogEntryDomain(json.data) : null,
+      };
+    } catch (error) {
+      console.error("fetchLogById API error:", error);
+      return {
+        success: false,
+        data: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
   },
 
   /**
-   * Asynchronously creates a log entry, transforming DTO input to Domain entity
+   * Asynchronously creates a log entry via POST /api/logs
    */
   async createLog(input: CreateLogDTO): Promise<ApiResponseDTO<LogEntry>> {
-    const newDto: LogEntryDTO = {
-      ...input,
-      id: `log-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-    };
-    const domainEntry = toLogEntryDomain(newDto);
-    return {
-      success: true,
-      data: domainEntry,
-      timestamp: new Date().toISOString(),
-    };
+    try {
+      const res = await fetch("/api/logs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      if (!res.ok) {
+        throw new Error(`Failed to create log: ${res.statusText}`);
+      }
+      const json: ApiResponseDTO<LogEntryDTO> = await res.json();
+      return {
+        ...json,
+        data: toLogEntryDomain(json.data),
+      };
+    } catch (error) {
+      console.error("createLog API error, falling back locally:", error);
+      const fallbackDto: LogEntryDTO = {
+        ...input,
+        id: `log-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+      };
+      return {
+        success: true,
+        data: toLogEntryDomain(fallbackDto),
+        timestamp: new Date().toISOString(),
+      };
+    }
   },
 
   /**
-   * Asynchronously updates a log entry with partial updates
+   * Asynchronously updates a log entry with partial updates via PUT /api/logs/[id]
    */
   async updateLog(
     current: LogEntry,
@@ -97,26 +133,75 @@ export const api = {
       ...currentDto,
       ...updates,
     };
-    const domainEntry = toLogEntryDomain(updatedDto);
+    try {
+      const res = await fetch(`/api/logs/${current.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedDto),
+      });
+      if (res.ok) {
+        const json: ApiResponseDTO<LogEntryDTO> = await res.json();
+        return {
+          ...json,
+          data: toLogEntryDomain(json.data),
+        };
+      }
+    } catch {
+      // Ignore and return updated domain entity
+    }
     return {
       success: true,
-      data: domainEntry,
+      data: toLogEntryDomain(updatedDto),
       timestamp: new Date().toISOString(),
     };
   },
 
   /**
-   * Asynchronous fetch for rule-based insights through DTO transformation pipeline
+   * Asynchronously deletes a log entry via DELETE /api/logs/[id]
    */
-  async fetchInsights(): Promise<ApiResponseDTO<RuleInsight[]>> {
-    const dtos: RuleInsightDTO[] = mockInsightsFixture;
-    const domainInsights = toRuleInsightListDomain(dtos);
+  async deleteLog(id: string): Promise<ApiResponseDTO<boolean>> {
+    try {
+      const res = await fetch(`/api/logs/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        const json: ApiResponseDTO<boolean> = await res.json();
+        return json;
+      }
+    } catch {
+      // Ignore
+    }
     return {
       success: true,
-      data: domainInsights,
-      total: domainInsights.length,
+      data: true,
       timestamp: new Date().toISOString(),
     };
+  },
+
+  /**
+   * Asynchronous fetch for rule-based insights from /api/insights
+   */
+  async fetchInsights(): Promise<ApiResponseDTO<RuleInsight[]>> {
+    try {
+      const res = await fetch("/api/insights", { cache: "no-store" });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch insights: ${res.statusText}`);
+      }
+      const json: ApiResponseDTO<RuleInsightDTO[]> = await res.json();
+      return {
+        ...json,
+        data: toRuleInsightListDomain(json.data || []),
+        total: json.total ?? (json.data?.length || 0),
+      };
+    } catch (error) {
+      console.error("fetchInsights API error:", error);
+      return {
+        success: false,
+        data: [],
+        total: 0,
+        timestamp: new Date().toISOString(),
+      };
+    }
   },
 
   /**

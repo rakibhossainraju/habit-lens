@@ -3,12 +3,17 @@
 import React, { useState } from "react";
 import { PageHeader } from "@/components/page-header";
 import { InsightCard } from "@/components/insight-card";
+import { LoadingState } from "@/components/loading-state";
 import { useStorage } from "@/lib/storage-context";
 import { EmptyState } from "@/components/empty-state";
 
 export default function InsightsPage() {
-  const { insights } = useStorage();
+  const { insights, isLoading } = useStorage();
   const [filterConfidence, setFilterConfidence] = useState<string>("All");
+
+  if (isLoading) {
+    return <LoadingState rows={4} />;
+  }
 
   const filtered = insights.filter((i) => {
     if (filterConfidence === "All") return true;

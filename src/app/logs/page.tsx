@@ -5,11 +5,16 @@ import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { LogTable } from "@/components/log-table";
+import { LoadingState } from "@/components/loading-state";
 import { Button } from "@/components/ui/button";
 import { useStorage } from "@/lib/storage-context";
 
 export default function LogsPage() {
-  const { logs, deleteLog } = useStorage();
+  const { logs, deleteLog, isLoading } = useStorage();
+
+  if (isLoading) {
+    return <LoadingState rows={5} />;
+  }
 
   return (
     <div className="space-y-6">
