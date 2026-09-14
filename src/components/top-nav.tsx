@@ -54,8 +54,8 @@ export function TopNav({ onToggleSidebar }: TopNavProps) {
         >
           {/* Both icons ship in the markup; the `dark` class the theme script
               sets before first paint decides which one shows. */}
-          <Moon className="size-4 text-muted-foreground dark:hidden" />
-          <Sun className="hidden size-4 text-accent-foreground dark:block" />
+          <Sun className="size-4 text-muted-foreground dark:hidden" />
+          <Moon className="hidden size-4 text-accent-foreground dark:block" />
         </Button>
 
         {/* User Menu Avatar */}
