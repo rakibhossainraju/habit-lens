@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, Sun, Moon, PanelLeft, User } from "lucide-react";
+import { Search, Sun, Moon, PanelLeft, User, LogOut } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import { toggleTheme } from "@/lib/theme";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -12,6 +13,8 @@ interface TopNavProps {
 
 export function TopNav({ onToggleSidebar }: TopNavProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const { data: session } = useSession();
+  const displayName = session?.user?.name || session?.user?.email || "Self Reflection";
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-colors">
@@ -58,15 +61,24 @@ export function TopNav({ onToggleSidebar }: TopNavProps) {
           <Moon className="hidden size-4 text-accent-foreground dark:block" />
         </Button>
 
-        {/* User Menu Avatar */}
+        {/* User Menu */}
         <div className="flex items-center gap-2 pl-2 border-l border-border">
-          <div className="flex size-7 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
             <User className="size-4" />
           </div>
           <div className="hidden sm:flex flex-col text-left">
-            <span className="text-xs font-medium leading-none">Self Reflection</span>
+            <span className="text-xs font-medium leading-none truncate max-w-32">{displayName}</span>
             <span className="text-[10px] text-muted-foreground leading-tight">Habit Lens v1</span>
           </div>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            aria-label="Sign out"
+            title="Sign out"
+          >
+            <LogOut className="size-4 text-muted-foreground" strokeWidth={1.75} />
+          </Button>
         </div>
       </div>
     </header>
