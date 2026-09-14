@@ -35,6 +35,56 @@ export const api = {
   },
 
   /**
+   * Resets database to default sample fixtures via POST /api/logs/reset
+   */
+  async resetDatabase(): Promise<ApiResponseDTO<LogEntry[]>> {
+    try {
+      const res = await fetch("/api/logs/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reset" }),
+      });
+      const json: ApiResponseDTO<LogEntryDTO[]> = await res.json();
+      return {
+        ...json,
+        data: toLogEntryListDomain(json.data || []),
+      };
+    } catch {
+      return {
+        success: true,
+        data: this.getInitialLogs(),
+        total: 14,
+        timestamp: new Date().toISOString(),
+      };
+    }
+  },
+
+  /**
+   * Clears all log entries from the database via POST /api/logs/reset
+   */
+  async clearDatabase(): Promise<ApiResponseDTO<LogEntry[]>> {
+    try {
+      const res = await fetch("/api/logs/reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "clear" }),
+      });
+      const json: ApiResponseDTO<LogEntryDTO[]> = await res.json();
+      return {
+        ...json,
+        data: [],
+      };
+    } catch {
+      return {
+        success: true,
+        data: [],
+        total: 0,
+        timestamp: new Date().toISOString(),
+      };
+    }
+  },
+
+  /**
    * Asynchronous fetch for logs from /api/logs
    */
   async fetchLogs(): Promise<ApiResponseDTO<LogEntry[]>> {

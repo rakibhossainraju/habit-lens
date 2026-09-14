@@ -33,17 +33,17 @@ export default function SettingsPage() {
     downloadAnchor.remove();
   };
 
-  const handleResetToSample = () => {
+  const handleResetToSample = async () => {
     if (confirm("Reset all logs to initial sample dataset from fixtures?")) {
-      resetToDefault();
+      await resetToDefault();
       setActionDone("Sample Data Restored");
       setTimeout(() => setActionDone(null), 3000);
     }
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (confirm("Clear all recorded logs for a completely fresh start? This will delete all current logs.")) {
-      clearAllLogs();
+      await clearAllLogs();
       setActionDone("All Data Cleared");
       setTimeout(() => setActionDone(null), 3000);
     }
