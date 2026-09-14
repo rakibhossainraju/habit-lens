@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { PlusCircle, Moon, Sun, SunMedium, Sunset, Sparkles, ArrowRight } from "lucide-react";
+import { Moon, Sun, SunMedium, Sunset, Sparkles, ArrowRight } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { MetricCard } from "@/components/metric-card";
 import { InsightCard } from "@/components/insight-card";
@@ -36,14 +36,7 @@ export default function DashboardPage() {
       <PageHeader
         title="Dashboard"
         description="Observe your recent wellbeing trends and daily activity patterns with quiet clarity."
-      >
-        <Link href="/logs/new">
-          <Button variant="default" size="sm" className="gap-2">
-            <PlusCircle className="size-4" />
-            <span>Quick Log</span>
-          </Button>
-        </Link>
-      </PageHeader>
+      />
 
       {/* Today's Status Banner */}
       <Card className="bg-secondary/40 border-border">
