@@ -1,20 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, use, useState } from "react";
 import { Search, Sun, Moon, PanelLeft, User, LogOut } from "lucide-react";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import type { Session } from "next-auth";
 import { toggleTheme } from "@/lib/theme";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 interface TopNavProps {
   onToggleSidebar?: () => void;
+  sessionPromise?: Promise<Session | null>;
 }
 
-export function TopNav({ onToggleSidebar }: TopNavProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const { data: session } = useSession();
+function UserBadge({ sessionPromise }: { sessionPromise?: Promise<Session | null> }) {
+  const session = sessionPromise ? use(sessionPromise) : null;
   const displayName = session?.user?.name || session?.user?.email || "Self Reflection";
+
+  return (
+    <div className="hidden sm:flex flex-col text-left">
+      <span className="text-xs font-medium leading-none truncate max-w-32">{displayName}</span>
+      <span className="text-[10px] text-muted-foreground leading-tight">Habit Lens v1</span>
+    </div>
+  );
+}
+
+function UserBadgeFallback() {
+  return (
+    <div className="hidden sm:flex flex-col text-left">
+      <div className="h-3 w-20 bg-muted/60 rounded animate-pulse mb-1" />
+      <div className="h-2 w-14 bg-muted/40 rounded animate-pulse" />
+    </div>
+  );
+}
+
+export function TopNav({ onToggleSidebar, sessionPromise }: TopNavProps) {
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-border bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/80 transition-colors">
@@ -66,10 +87,9 @@ export function TopNav({ onToggleSidebar }: TopNavProps) {
           <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
             <User className="size-4" />
           </div>
-          <div className="hidden sm:flex flex-col text-left">
-            <span className="text-xs font-medium leading-none truncate max-w-32">{displayName}</span>
-            <span className="text-[10px] text-muted-foreground leading-tight">Habit Lens v1</span>
-          </div>
+          <Suspense fallback={<UserBadgeFallback />}>
+            <UserBadge sessionPromise={sessionPromise} />
+          </Suspense>
           <Button
             variant="ghost"
             size="icon-sm"
