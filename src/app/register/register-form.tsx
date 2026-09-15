@@ -18,6 +18,15 @@ export function RegisterForm() {
     setError(undefined);
 
     const formData = new FormData(event.currentTarget);
+    const password = formData.get("password");
+    const confirmPassword = formData.get("confirmPassword");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      setPending(false);
+      return;
+    }
+
     const result = await registerUser(undefined, formData);
     if (result?.error) {
       setError(result.error);
@@ -75,6 +84,19 @@ export function RegisterForm() {
             required
           />
           <p className="text-[10px] text-muted-foreground mt-1">At least 8 characters.</p>
+        </div>
+        <div>
+          <label className="text-xs font-medium text-muted-foreground block mb-1.5" htmlFor="confirmPassword">
+            Confirm Password
+          </label>
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            minLength={8}
+            required
+          />
         </div>
         <Button type="submit" className="w-full" disabled={pending}>
           {pending ? "Creating account…" : "Create account"}

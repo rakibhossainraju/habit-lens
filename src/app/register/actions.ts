@@ -4,15 +4,21 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 
-const RegisterSchema = z.object({
-  name: z.string().trim().min(2, { message: "Name must be at least 2 characters." }),
-  email: z
-    .string()
-    .trim()
-    .toLowerCase()
-    .email({ message: "Enter a valid email address." }),
-  password: z.string().min(8, { message: "Use at least 8 characters." }),
-});
+const RegisterSchema = z
+  .object({
+    name: z.string().trim().min(2, { message: "Name must be at least 2 characters." }),
+    email: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .email({ message: "Enter a valid email address." }),
+    password: z.string().min(8, { message: "Use at least 8 characters." }),
+    confirmPassword: z.string().min(1, { message: "Please confirm your password." }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
 
 export type RegisterFormState = { error?: string } | undefined;
 
@@ -24,6 +30,7 @@ export async function registerUser(
     name: formData.get("name"),
     email: formData.get("email"),
     password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
   });
 
   if (!parsed.success) {
