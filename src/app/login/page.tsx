@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { AuthCard } from "@/components/auth-card";
 import { LoginForm } from "./login-form";
@@ -13,13 +14,17 @@ interface LoginPageProps {
   searchParams: Promise<{ error?: string; callbackUrl?: string }>;
 }
 
-export default async function LoginPage({ searchParams }: LoginPageProps) {
+async function LoginFormWithParams({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const callbackUrl = params.callbackUrl && params.callbackUrl.startsWith("/") ? params.callbackUrl : "/dashboard";
   const initialError = params.error
     ? (ERROR_MESSAGES[params.error] ?? "Something went wrong signing you in. Please try again.")
     : undefined;
 
+  return <LoginForm callbackUrl={callbackUrl} initialError={initialError} />;
+}
+
+export default function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <AuthCard
       title="Welcome back"
@@ -33,7 +38,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         </span>
       }
     >
-      <LoginForm callbackUrl={callbackUrl} initialError={initialError} />
+      <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted/40" />}>
+        <LoginFormWithParams searchParams={searchParams} />
+      </Suspense>
     </AuthCard>
   );
 }

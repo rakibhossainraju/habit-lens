@@ -1,11 +1,18 @@
 "use client";
 
 import React, { Suspense, useState } from "react";
+import type { Session } from "next-auth";
 import { Sidebar } from "./sidebar";
 import { TopNav } from "./top-nav";
 import { cn } from "@/lib/utils";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  sessionPromise,
+}: {
+  children: React.ReactNode;
+  sessionPromise?: Promise<Session | null>;
+}) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -22,7 +29,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           collapsed ? "ml-16" : "ml-64"
         )}
       >
-        <TopNav onToggleSidebar={() => setCollapsed(!collapsed)} />
+        <TopNav
+          onToggleSidebar={() => setCollapsed(!collapsed)}
+          sessionPromise={sessionPromise}
+        />
         <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
           {children}
         </main>
